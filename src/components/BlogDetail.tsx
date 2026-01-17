@@ -34,11 +34,6 @@ const getCategoryColor = (category: string): string => {
   return categoryColors[key] || categoryColors.default;
 };
 
-interface BlogDetailProps {
-  blog: Blog;
-  onBack: () => void;
-}
-
 /**
  * Article-style blog detail view.
  * Design rationale:

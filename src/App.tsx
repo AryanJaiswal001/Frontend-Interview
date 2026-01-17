@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   QueryClient,
   QueryClientProvider,
@@ -99,6 +99,14 @@ function BlogApp() {
     },
   });
 
+  // Sort blogs by date (newest first) - memoized for performance
+  const sortedBlogs = useMemo(() => {
+    if (!blogs) return [];
+    return [...blogs].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+  }, [blogs]);
+
   const handleCreateSubmit = useCallback(
     (data: any) => {
       createMutation.mutate(data);
@@ -185,7 +193,7 @@ function BlogApp() {
               </div>
             )}
 
-            {blogs?.map((blog) => (
+            {sortedBlogs.map((blog) => (
               <BlogCard
                 key={blog.id}
                 blog={blog}
@@ -194,7 +202,7 @@ function BlogApp() {
               />
             ))}
 
-            {!isLoadingBlogs && blogs?.length === 0 && (
+            {!isLoadingBlogs && sortedBlogs.length === 0 && (
               <div className="text-center py-16 space-y-2">
                 <div className="text-3xl opacity-30">📝</div>
                 <p className="text-sm font-medium text-muted-foreground">
