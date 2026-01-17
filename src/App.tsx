@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, Loader2, AlertCircle, RefreshCcw } from "lucide-react";
 import { Blog } from "@/types/blog";
 
-
 // Initialize QueryClient with optimized defaults
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -116,18 +115,20 @@ function BlogApp() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="h-screen bg-background text-foreground flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="border-b sticky top-0 bg-background/95 backdrop-blur z-20">
-        <div className="container mx-auto py-3 px-4 flex justify-between items-center">
+      <header className="border-b bg-background/95 backdrop-blur z-20 shrink-0">
+        <div className="container mx-auto py-4 px-6 flex justify-between items-center">
           <div
-            className="flex items-center gap-2 cursor-pointer"
+            className="flex items-center gap-3 cursor-pointer group"
             onClick={resetView}
           >
-            <span className="bg-primary text-primary-foreground font-bold p-1 rounded">
+            <span className="bg-primary text-primary-foreground font-bold px-2.5 py-1.5 rounded-md text-sm tracking-wide">
               CA
             </span>
-            <h1 className="text-xl font-bold tracking-tight">Monk Blog</h1>
+            <h1 className="text-xl font-bold tracking-tight group-hover:text-primary transition-colors">
+              Monk Blog
+            </h1>
           </div>
           <Button
             onClick={() => {
@@ -135,6 +136,7 @@ function BlogApp() {
               setSelectedBlogId(null);
             }}
             size="sm"
+            className="shadow-sm"
           >
             <PlusCircle className="mr-2 h-4 w-4" />
             New Post
@@ -142,67 +144,73 @@ function BlogApp() {
         </div>
       </header>
 
-      {/* Main Layout */}
-      <main className="container mx-auto p-4 flex-grow grid grid-cols-1 md:grid-cols-12 gap-6 min-h-0">
+      {/* Main Layout - Fixed height for independent scroll */}
+      <main className="flex-1 container mx-auto px-6 py-4 grid grid-cols-1 md:grid-cols-12 gap-6 overflow-hidden">
         {/* --- Left Panel: Blog List --- */}
         {/* Helper logic: Hidden on mobile if detail is active, always visible on desktop */}
-        <div
-          className={`md:col-span-4 lg:col-span-3 flex flex-col min-h-0 overflow-hidden ${selectedBlogId || isCreating ? "hidden md:flex" : "flex"}`}
+        <aside
+          className={`md:col-span-4 lg:col-span-3 flex flex-col overflow-hidden border-r border-border/50 pr-4 ${selectedBlogId || isCreating ? "hidden md:flex" : "flex"}`}
         >
-          <div className="mb-4 flex items-center justify-between shrink-0">
-            <h2 className="text-lg font-semibold text-muted-foreground">
-              Recent Articles
+          <div className="pb-3 flex items-center justify-between shrink-0 border-b border-border/50 mb-3">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              Articles
             </h2>
             <Button
               variant="ghost"
               size="icon"
+              className="h-8 w-8"
               onClick={() => refetch()}
               title="Refresh list"
             >
-              <RefreshCcw className="h-4 w-4" />
+              <RefreshCcw className="h-3.5 w-3.5" />
             </Button>
           </div>
 
-          <div className="space-y-4 overflow-y-auto pr-2 pb-4 flex-grow min-h-0">
+          {/* Independent scrollable list */}
+          <div className="space-y-1 overflow-y-auto flex-1 -mr-2 pr-2">
             {isLoadingBlogs && (
-              <div className="flex flex-col items-center justify-center py-10 space-y-3">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">
-                  Loading articles...
-                </p>
+              <div className="flex flex-col items-center justify-center py-16 space-y-3">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <p className="text-xs text-muted-foreground">Loading...</p>
               </div>
             )}
 
             {isErrorBlogs && (
-              <div className="p-4 border border-destructive/20 bg-destructive/5 rounded-lg text-destructive text-sm flex gap-2">
-                <AlertCircle className="h-5 w-5 shrink-0" />
+              <div className="p-3 border border-destructive/30 bg-destructive/10 rounded-lg text-destructive text-xs flex gap-2 items-start">
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                 <span>{errorBlogs.message}</span>
               </div>
             )}
 
             {blogs?.map((blog) => (
-              <div
+              <BlogCard
                 key={blog.id}
-                className={`transition-all duration-200 ${selectedBlogId === blog.id ? "ring-2 ring-primary rounded-xl translate-x-1" : ""}`}
-              >
-                <BlogCard blog={blog} onClick={handleCardClick} />
-              </div>
+                blog={blog}
+                onClick={handleCardClick}
+                isSelected={selectedBlogId === blog.id}
+              />
             ))}
 
             {!isLoadingBlogs && blogs?.length === 0 && (
-              <div className="text-center py-10 text-muted-foreground">
-                No blog posts found.
+              <div className="text-center py-16 space-y-2">
+                <div className="text-3xl opacity-30">📝</div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  No articles yet
+                </p>
+                <p className="text-xs text-muted-foreground/70">
+                  Create your first post to get started
+                </p>
               </div>
             )}
           </div>
-        </div>
+        </aside>
 
         {/* --- Right Panel: Detail OR Create Form --- */}
-        <div
-          className={`md:col-span-8 lg:col-span-9 overflow-y-auto bg-muted/20 border rounded-xl p-4 md:p-8 min-h-0 ${!selectedBlogId && !isCreating ? "hidden md:block" : "block"}`}
+        <section
+          className={`md:col-span-8 lg:col-span-9 overflow-y-auto ${!selectedBlogId && !isCreating ? "hidden md:flex" : "flex"}`}
         >
           {isCreating ? (
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-2xl mx-auto w-full py-4">
               <CreateBlogForm
                 onSubmit={handleCreateSubmit}
                 onCancel={resetView}
@@ -210,37 +218,36 @@ function BlogApp() {
             </div>
           ) : selectedBlogId ? (
             isLoadingDetail ? (
-              <div className="h-full flex flex-col items-center justify-center space-y-4">
-                <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-                <p className="text-muted-foreground animate-pulse">
-                  Fetching content...
+              <div className="flex-1 flex flex-col items-center justify-center space-y-3">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">
+                  Loading article...
                 </p>
               </div>
             ) : selectedBlog ? (
               <BlogDetail blog={selectedBlog} onBack={resetView} />
             ) : (
-              // Fallback if ID exists but data is null (rare)
-              <div className="text-center py-20">Post not found.</div>
+              <div className="flex-1 flex items-center justify-center">
+                <p className="text-muted-foreground">Post not found.</p>
+              </div>
             )
           ) : (
-            // Empty State (Desktop only usually)
-            <div className="h-full flex flex-col items-center justify-center text-muted-foreground/50 space-y-4">
-              <div className="bg-muted p-6 rounded-full">
-                <div className="text-6xl grayscale opacity-50">📰</div>
+            // Empty State - More prominent and instructive
+            <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
+              <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-6">
+                <span className="text-3xl">📖</span>
               </div>
-              <div className="text-center">
-                <h3 className="text-xl font-semibold text-foreground">
-                  Select an article
-                </h3>
-                <p className="text-sm mt-1">
-                  Choose a post from the sidebar to start reading
-                </p>
-              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                Select an article to read
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-xs">
+                Choose a post from the sidebar, or create a new one to get
+                started.
+              </p>
             </div>
           )}
-        </div>
+        </section>
       </main>
-     
     </div>
   );
 }
