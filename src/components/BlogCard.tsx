@@ -23,8 +23,10 @@ export function BlogCard({ blog, onClick }: BlogCardProps) {
         <img
           src={blog.coverImage}
           alt={blog.title}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-        ></img>
+        />
       </div>
 
       <CardHeader>
@@ -46,9 +48,9 @@ export function BlogCard({ blog, onClick }: BlogCardProps) {
 
       <CardContent className="grow">
         <CardDescription className="line-clamp-3">
-            {blog.description}
+          {blog.description}
         </CardDescription>
-    </CardContent>
+      </CardContent>
 
       <CardFooter className="mt-auto">
         <Button className="w-full" onClick={() => onClick(blog.id)}>

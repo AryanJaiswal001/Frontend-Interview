@@ -14,8 +14,15 @@ import { PlusCircle, Loader2, AlertCircle, RefreshCcw } from "lucide-react";
 import { Blog } from "@/types/blog";
 
 
-// Initialize QueryClient
-const queryClient = new QueryClient();
+// Initialize QueryClient with optimized defaults
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // --- API Functions ---
 
@@ -136,13 +143,13 @@ function BlogApp() {
       </header>
 
       {/* Main Layout */}
-      <main className="container mx-auto p-4 flex-grow grid grid-cols-1 md:grid-cols-12 gap-6 h-[calc(100vh-65px)] overflow-hidden">
+      <main className="container mx-auto p-4 flex-grow grid grid-cols-1 md:grid-cols-12 gap-6 min-h-0">
         {/* --- Left Panel: Blog List --- */}
         {/* Helper logic: Hidden on mobile if detail is active, always visible on desktop */}
         <div
-          className={`md:col-span-4 lg:col-span-3 flex flex-col h-full ${selectedBlogId || isCreating ? "hidden md:flex" : "flex"}`}
+          className={`md:col-span-4 lg:col-span-3 flex flex-col min-h-0 overflow-hidden ${selectedBlogId || isCreating ? "hidden md:flex" : "flex"}`}
         >
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between shrink-0">
             <h2 className="text-lg font-semibold text-muted-foreground">
               Recent Articles
             </h2>
@@ -156,7 +163,7 @@ function BlogApp() {
             </Button>
           </div>
 
-          <div className="space-y-4 overflow-y-auto pr-2 pb-20 custom-scrollbar flex-grow">
+          <div className="space-y-4 overflow-y-auto pr-2 pb-4 flex-grow min-h-0">
             {isLoadingBlogs && (
               <div className="flex flex-col items-center justify-center py-10 space-y-3">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -192,7 +199,7 @@ function BlogApp() {
 
         {/* --- Right Panel: Detail OR Create Form --- */}
         <div
-          className={`md:col-span-8 lg:col-span-9 h-full overflow-y-auto bg-muted/20 border rounded-xl p-4 md:p-8 ${!selectedBlogId && !isCreating ? "hidden md:block" : "block"}`}
+          className={`md:col-span-8 lg:col-span-9 overflow-y-auto bg-muted/20 border rounded-xl p-4 md:p-8 min-h-0 ${!selectedBlogId && !isCreating ? "hidden md:block" : "block"}`}
         >
           {isCreating ? (
             <div className="max-w-2xl mx-auto">
