@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   QueryClient,
   QueryClientProvider,
@@ -99,20 +99,23 @@ function BlogApp() {
     },
   });
 
-  const handleCreateSubmit = (data: any) => {
-    createMutation.mutate(data);
-  };
+  const handleCreateSubmit = useCallback(
+    (data: any) => {
+      createMutation.mutate(data);
+    },
+    [createMutation],
+  );
 
-  const handleCardClick = (id: number) => {
+  const handleCardClick = useCallback((id: number) => {
     setIsCreating(false);
     setSelectedBlogId(id);
     // On mobile, this will shift view due to CSS classes below
-  };
+  }, []);
 
-  const resetView = () => {
+  const resetView = useCallback(() => {
     setIsCreating(false);
     setSelectedBlogId(null);
-  };
+  }, []);
 
   return (
     <div className="h-screen bg-background text-foreground flex flex-col overflow-hidden">
@@ -149,7 +152,7 @@ function BlogApp() {
         {/* --- Left Panel: Blog List --- */}
         {/* Helper logic: Hidden on mobile if detail is active, always visible on desktop */}
         <aside
-          className={`md:col-span-4 lg:col-span-3 flex flex-col overflow-hidden border-r border-border/50 pr-4 ${selectedBlogId || isCreating ? "hidden md:flex" : "flex"}`}
+          className={`md:col-span-4 lg:col-span-3 flex flex-col overflow-hidden border-r border-border/40 pr-4 bg-muted/20 -ml-6 pl-6 -my-4 py-4 ${selectedBlogId || isCreating ? "hidden md:flex" : "flex"}`}
         >
           <div className="pb-3 flex items-center justify-between shrink-0 border-b border-border/50 mb-3">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
@@ -167,7 +170,7 @@ function BlogApp() {
           </div>
 
           {/* Independent scrollable list */}
-          <div className="space-y-1 overflow-y-auto flex-1 -mr-2 pr-2">
+          <div className="space-y-1 overflow-y-auto flex-1 -mr-2 pr-2 scrollbar-hide">
             {isLoadingBlogs && (
               <div className="flex flex-col items-center justify-center py-16 space-y-3">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -207,7 +210,7 @@ function BlogApp() {
 
         {/* --- Right Panel: Detail OR Create Form --- */}
         <section
-          className={`md:col-span-8 lg:col-span-9 overflow-y-auto ${!selectedBlogId && !isCreating ? "hidden md:flex" : "flex"}`}
+          className={`md:col-span-8 lg:col-span-9 overflow-y-auto scrollbar-hide ${!selectedBlogId && !isCreating ? "hidden md:flex" : "flex"}`}
         >
           {isCreating ? (
             <div className="max-w-2xl mx-auto w-full py-4">

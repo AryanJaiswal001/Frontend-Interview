@@ -1,3 +1,4 @@
+import { memo, useCallback } from "react";
 import { Blog } from "@/types/blog";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "lucide-react";
@@ -10,23 +11,54 @@ interface BlogCardProps {
 }
 
 /**
+ * Category-to-color mapping for semantic visual distinction.
+ * Uses Tailwind's color palette with muted tones for professionalism.
+ */
+const categoryColors: Record<string, string> = {
+  technology:
+    "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  design:
+    "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+  business:
+    "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+  lifestyle: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300",
+  travel:
+    "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+  health: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300",
+  food: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
+  science: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300",
+  default: "bg-secondary text-secondary-foreground",
+};
+
+const getCategoryColor = (category: string): string => {
+  const key = category.toLowerCase();
+  return categoryColors[key] || categoryColors.default;
+};
+
+/**
  * Compact, scannable blog card optimized for sidebar navigation.
  * Design rationale:
  * - Horizontal layout increases information density
  * - Small thumbnail provides visual anchor without dominating
  * - Title-first hierarchy for quick scanning
  * - Subtle hover/selected states guide interaction
+ * - Memoized to prevent re-renders when other cards change
  */
-export function BlogCard({ blog, onClick, isSelected }: BlogCardProps) {
+const BlogCardComponent = memo(function BlogCard({
+  blog,
+  onClick,
+  isSelected,
+}: BlogCardProps) {
+  const handleClick = useCallback(() => onClick(blog.id), [onClick, blog.id]);
   return (
     <button
-      onClick={() => onClick(blog.id)}
+      onClick={handleClick}
       className={cn(
-        "w-full text-left p-3 rounded-lg transition-all duration-200",
-        "hover:bg-accent/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+        "w-full text-left p-3 rounded-lg transition-all duration-150",
+        "hover:bg-accent/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
         "group cursor-pointer",
         isSelected
-          ? "bg-accent border-l-2 border-l-primary"
+          ? "bg-accent shadow-sm border-l-2 border-l-primary"
           : "hover:translate-x-0.5",
       )}
     >
@@ -69,7 +101,10 @@ export function BlogCard({ blog, onClick, isSelected }: BlogCardProps) {
               <Badge
                 key={cat}
                 variant="secondary"
-                className="text-[10px] px-1.5 py-0 h-4 font-normal"
+                className={cn(
+                  "text-[10px] px-1.5 py-0 h-4 font-medium border-0",
+                  getCategoryColor(cat),
+                )}
               >
                 {cat}
               </Badge>
@@ -79,4 +114,6 @@ export function BlogCard({ blog, onClick, isSelected }: BlogCardProps) {
       </div>
     </button>
   );
-}
+});
+
+export { BlogCardComponent as BlogCard };
