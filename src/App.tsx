@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   QueryClient,
   QueryClientProvider,
@@ -10,7 +10,14 @@ import { BlogCard } from "@/components/BlogCard";
 import { BlogDetail } from "@/components/BlogDetail";
 import { CreateBlogForm } from "@/components/CreateBlogForm";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Loader2, AlertCircle, RefreshCcw } from "lucide-react";
+import {
+  PlusCircle,
+  Loader2,
+  AlertCircle,
+  RefreshCcw,
+  Moon,
+  Sun,
+} from "lucide-react";
 import { Blog } from "@/types/blog";
 
 // Initialize QueryClient with optimized defaults
@@ -63,7 +70,30 @@ const createBlog = async (newBlog: any) => {
 function BlogApp() {
   const [selectedBlogId, setSelectedBlogId] = useState<number | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    // Check localStorage or system preference on initial load
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("theme");
+      if (stored) return stored === "dark";
+      return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
+    return false;
+  });
   const queryClient = useQueryClient();
+
+  // Sync dark mode class with document
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDark) {
+      root.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      root.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [isDark]);
+
+  const toggleDarkMode = useCallback(() => setIsDark((prev) => !prev), []);
 
   // 1. Query: Get All Blogs
   const {
@@ -141,17 +171,32 @@ function BlogApp() {
               Monk Blog
             </h1>
           </div>
-          <Button
-            onClick={() => {
-              setIsCreating(true);
-              setSelectedBlogId(null);
-            }}
-            size="sm"
-            className="shadow-sm"
-          >
-            <PlusCircle className="mr-2 h-4 w-4" />
-            New Post
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleDarkMode}
+              className="h-9 w-9"
+              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {isDark ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              onClick={() => {
+                setIsCreating(true);
+                setSelectedBlogId(null);
+              }}
+              size="sm"
+              className="shadow-sm"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              New Post
+            </Button>
+          </div>
         </div>
       </header>
 
